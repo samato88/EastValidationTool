@@ -21,7 +21,7 @@ Each library used a distinct  Google App Script that contained these files:
 - *spreadsheetID* - id of the google sheet with which the tool is to interact
 - *catalogHttps* - true/false - whether or not the library's opac supported https.  If true, the catalog check opened the catalog in a frame, otherwise opened in new tab
 
- ### Production Library
+### Production Library
 The production library was a separate single script, with the code shared by all installations of the validation tool.   It had a single code.gs file, and is included here as
 - ProductionLibrary-Code.gs
 
