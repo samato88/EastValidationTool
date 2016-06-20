@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Use a templated HTML printing scriptlet to import common stylesheet -->
+    
+    <!--<link rel="stylesheet" type="text/css" href="https://blc.org/sites/default/files/BLC_Uploads/images/EAST.css">-->
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?> 
+    <?var url = getScriptUrl();?>
+    <?var libraryName = scriptProperties.getProperty('libraryName');  ?>
+
+  </head>
+  <body>
+  <div id="banner">
+    <h1>EAST Validation Study: Verify Missing : <?= libraryName ?></h1>
+  </div> 
+     
+   <div id="loading" class="centerRow">
+             <h2>Processing ...</h2>
+             <img src="https://blc.org/sites/default/files/BLC_Uploads/images/loopingCircle.gif" alt="loading" />
+            <!-- <img src="https://googledrive.com/host/0B8sJaH4hMTrGTHRLZ1ladk9zVkE/loopingCircle.gif" alt="loading..." />
+             <img src="https://goo.gl/SiE3Ks" alt="loading..." />-->
+   </div>
+   <h2 id="greeting">Check Catalog Status of Items Not on Shelf</h2>
+   
+   <div id="httpsIframe">
+<iframe width="100%" height="300px" src="https://blc.org/sites/default/files/BLC_Uploads/images/EASTiframe.html" name="ciframe" id="catalog_iframe"></iframe>
+   </div>
+<!--<div id="scrollBox">-->
+<form id="myForm">     
+        <div id="thingsNotOnShelf">   
+  
+        </div>
+        <input id='submitButton' type="button" value="Submit Data" onclick="submitMissingData(this.parentNode)" />        
+   </form>
+<!--</div> -->  
+ 
+<div class="centerRow">
+  <div id="finished" title="Finished Validation">
+     <h2 class='centerRow'>No more items to check</h2>
+     <a class="buttonBox checkShelves" href='<?=url?>'>Return to Home Page</a>
+  </div>
+</div>
+
+<div id="submitSuccess">
+  <div class="centerRow">
+    <h1>Data Successfully Submitted</h1>
+    <h2>
+     <a href='<?=url?>'>Return to the Start Page</a> 
+    </h2>
+  </div>
+</div>
+
+<div id="offlineMessage" title="Offline!">
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+    <span class="error">You are currently <b>OFFLINE</b> and cannot upload.</span>
+  
+   Please return to a wifi / network connection and try again
+  </p>
+</div>
+
+    <!-- Use a templated HTML printing scriptlet to import JavaScript. -->
+    <?!= HtmlService.createHtmlOutputFromFile('MissingScript').getContent(); ?> 
+  </body>
+</html>
+
+

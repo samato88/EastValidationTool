@@ -1,0 +1,200 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+//* Run initializations on web app load - this is for the missing.html page
+   
+$(function() {
+  // $('#initialsError').hide();
+    $('#submitSuccess').hide();
+    $('#offlineMessage').hide();
+    $('#myForm').hide();
+    //$('#loading').hide();
+    $('#greeting').hide();
+    $('#finished').hide();
+    $('#catalog_iframe').hide(); 
+    $('#scrollBox').hide() ;
+
+    $("#thingsNotOnShelf").on("change","[name^='status']", function() { // delegate to things so retrieved stored will work
+      store() ;
+    }); 
+    
+    google.script.run
+      .withSuccessHandler(showHttpsIframe)
+      .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
+      .getCatalogHttps();
+    //var catalogHttps = google.script.run.getCatalogHttps(); //sadly this syntax can't return value
+         
+   if (localStorage.getItem("catalogFlag") == "true"  && localStorage.getItem("thingsNotOnShelfHTML") !== "") {
+       $( "#greeting" ).append( " - <b>Using Saved Data First!</b>" );
+	   loadStore(); 
+    } else { 
+      google.script.run
+        .withSuccessHandler(showMissing)
+        .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
+        .getMissing();
+    }
+});
+
+function showHttpsIframe(truefalse) { 
+ globalCatalogHttps = truefalse ;
+ if (truefalse === 'false') {
+    $('#httpsIframe').hide() ;
+  }
+}
+
+function getDataFailure(error) {
+        var loadingDiv = $('#loading');
+        loadingDiv.empty(); // remove 'loading...'
+        //var div = document.getElementById('output');
+        loadingDiv.append("ERROR: " + error.message);
+}     
+   
+function showMissing(notOnShelfData) { //  
+  $('#loading').hide(); // remove 'loading...'
+  $('#greeting').show();
+  $('#catalog_iframe').show() ;
+  $('#scrollBox').show() ;
+  $('#myForm').show();
+
+  var div = $('#thingsNotOnShelf');
+  
+ if (isMatch = /^ERROR.*/.test(notOnShelfData)) {
+ div.html("ERROR Getting Data - try again later.  If problem persists report this error to <a href='mailto:samato@blc.org'>EAST</a>.") ;
+ }// or test if string and not array 
+
+ if (notOnShelfData.length == 0) { // no more to check
+      $('#greeting').hide();
+      $('#catalog_iframe').hide() ;
+      $('#scrollBox').hide() ;
+      $('#submitButton').hide();
+      $('#finished').show();
+
+  } else { // data to check 
+    var notOnShelfTable = '<section class=""><div class="container">'
+  notOnShelfTable += "<table id='notOnShelfTable'> \
+  <tr><th>Call Number<div>Call Number</div></th><th>Location<div>Location</div></th> \
+  <th>Title<div>Title</div></th><th>Catalog Status<div>Catalog Status</div></th></tr>"  ;
+ 
+  for (var i = 0; i < notOnShelfData.length; i++) { // 0=call, 1=title, 2=catalog link, 3=original row #, 4=barcode, 5=location, 6=enumeration
+     var myElements ="<tr> \
+     <td><strong>" + notOnShelfData[i][0] + " " +  notOnShelfData[i][6] + "</strong></td> \
+     <td>" + notOnShelfData[i][5] + "</td> \
+     <td><a href='" + notOnShelfData[i][2] + "'" ;
+     if (globalCatalogHttps === 'true') {
+        myElements += " target='ciframe' " ;
+     } else { 
+        myElements += " target='_blank' " ;
+     }
+    
+     myElements += ">" + notOnShelfData[i][1].substring(0, 48) + "</a></td> \
+     <td> \
+      <select name='status-" + notOnShelfData[i][3] + "' id='status-" + notOnShelfData[i][3] + "'> \
+             <option value='NotOnShelf'>Select Catalog Status:</option> \
+             <option value='NotOnShelf-Verified'>Catalog Status Available</option> \
+             <option value='CheckedOut'>Checked Out / On Loan</option> \
+             <option value='LMBO'>Lost/Missing/Billed/Other</option> \
+            </select> \
+      </td></tr>"; 
+      
+      notOnShelfTable += myElements 
+  } // end for each nextDataSet
+  notOnShelfTable += "</table></div></section>" ;
+  div.html(notOnShelfTable) ;
+  }  // end else not finished list
+  
+  store() ; // load up localStore when page first loaded in case reloaded
+} // end showMissing
+
+function submitMissingData(form) {
+   var online = navigator.onLine;
+
+   $('#offlineMessage').hide();
+   
+   if (online) {
+
+      $('#loading').show();
+      $('#myForm').hide() ;
+      $('#things').hide();
+      $('#submitButton').hide();         
+      $('#submitSuccess').hide();
+      $('#offlineMessage').hide();
+      $('#greeting').hide();
+      $('#catalog_iframe').hide() ;
+      $('#scrollBox').hide() ;
+      $('#submitButton').hide();
+
+      google.script.run
+            .withSuccessHandler(spreadsheetUpdated)
+            .withFailureHandler(submitDataFailure)
+            .processMissingForm(form)
+            
+ } else {
+     //alert("offline!") ;
+   $('#offlineMessage').show();
+   $('#greeting').css({"color":"red"}) ;
+   $('#greeting').html('Currently Offline! Returne to wi-fi enable area and submit again.');
+
+   } // end else offline
+}  // end submitMissingData
+
+function submitDataFailure(error) {
+ $('#thingsNotOnShelf').hide();
+ //console.log("submit failed");
+ $('#things').innerHTML = "Get Data ERROR: " + error.message;
+}     
+ 
+function spreadsheetUpdated() {
+    //console.log("got submitted");
+    $('#loading').hide() ;
+    $('#myForm').hide() ;
+    $('#thingsNotOnShelf').hide();
+    $('#submitButton').hide();         
+    $('#submitSuccess').show();
+    localStorage.setItem("catFlag", ""); // reset local storage flag
+    clearStore() ; //clearing it out instead
+ }
+
+function store() { // thanks to https://css-tricks.com/video-screencasts/96-localstorage-for-forms/
+  localStorage.setItem("catFlag", "true");
+  
+  if (typeof(Storage) !== "undefined") {
+    var catalogthingsNotOnShelfHTML = $("#thingsNotOnShelf").html();  // consider using #myForm?
+    //console.log(thingsNotOnShelfHTML);
+    localStorage.setItem("catalogthingsNotOnShelfHTML", catalogthingsNotOnShelfHTML );
+    
+    var data = $("#myForm").serializeArray();
+	$.each(data, function(i, obj) { // iterate over results
+      // console.log(obj.name + ' = ' + obj.value);
+	   localStorage.setItem('catalog' + obj.name, obj.value);// HTML5 magic!!
+	});				
+    
+ } else {
+    $("#greeting").append("Please consider using an html5 compliant browser to avoid potential form data lose" );
+ }
+} // end store
+
+function loadStore() {
+  $('#loading').hide(); // remove 'loading...'
+  $('#greeting').show();
+  $('#catalog_iframe').show() ;
+  $('#scrollBox').show() ;
+  $('#myForm').show();
+
+  var div = $('#thingsNotOnShelf');
+  div.append(localStorage.getItem("catalogthingsNotOnShelfHTML"));
+  
+  for (var key in localStorage){
+    if ( key.match(/^catalogstatus/) ) {
+       var newkey = key.replace("catalog", "");// need to take catalog out of keyname
+       $("[name='" + newkey +"']").val(localStorage.getItem(key));
+    }
+  } // end for key in localStorage 
+} // end loadStore
+
+function clearStore() {
+  for (var key in localStorage){
+    if ( key.match(/^catalog/) ) {
+    localStorage.removeItem(key);
+    }
+  } // end for key in localStorage 
+}
+</script>

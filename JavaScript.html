@@ -1,0 +1,304 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+//* Run initializations on web app load - this is for the bos.html page
+   
+$(function() {
+    $('#initialsError').hide();
+    $('#submitSuccess').hide();
+    $('#offlineMessage').hide();
+    $('#myForm').hide();
+    $('#loading').hide();
+    $('#finished').hide();
+    
+       if (localStorage.getItem("flag") == "true") {
+			$( "#initials" ).prepend( "<p class='centerRow'>Saved Data Available.  <button id='retrieve'>Use Saved Data</button></p>" );
+	}
+    
+  $("#retrieve").on("click", function() {
+     loadStore();
+  }); 
+  
+    //http://blog.kongnir.com/2013/11/14/jquery-using-on-to-call-newly-added-elements/
+    $("#things").on("change",".missing", function() { // delegate to things so retrieved stored will work
+      $( this ).parent().next().hide() ;
+      store() ;
+    }); 
+    
+    $("#things").on("change", ".bookCondition", function() { // reset bookCondition to default, might be red if skipped
+      $(this).css({"background-color": "#C1DCBE"});
+      store() ;
+    }); // end function .barcode on change
+
+    $("#things").on("change", ".present", function() { // remove condition option if missing checked
+      $( this ).parent().next().show() ;
+      store() ;
+    }); // end function .missing on change
+    
+   $("#things").on("change", ".barcode", function(){
+     var enteredBarcode = $(this).val() ;
+     var barcode = $(this).next().val() ;
+     if(enteredBarcode.match(/^[0-9]{1,15}\*?$/)){
+       if (enteredBarcode === barcode) { 
+          //console.log($(this).next().val()) ;
+          //console.log($(this).parent().next().children(".present").val());
+          $(this).parent().next().children(".present").prop('checked', true);
+          $( this ).removeClass("misMatched") ; // remove this if bad barcode had been entered
+          $( this ).addClass("matched");
+          $( this ).parent().next().next().show() ; 
+        } else {
+          $( this ).removeClass("matched") ; // remove this if changed to bad barcode
+          $( this ).parent().next().children(".present").prop('checked', false);
+          $( this ).addClass("misMatched"); 
+        }   
+      } // end if valid entered barcode
+    else { // entered non 14 digit barcode
+      $( this ).addClass("misMatched"); 
+     }
+    store() ;
+   }); // end function .barcode on change
+    
+    google.script.run
+      .withSuccessHandler(showLocations)
+      .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
+      .getLocations();
+    
+});
+
+function showLocations(locations) {
+    var locsdiv = $('#location') ;
+    for (var index = 0; index < locations.length; index++) {
+      if (index === 0) {
+       locsdiv.append("<option value='"+ locations[index] +"' selected='selected'>"+ locations[index] +"</option>\n") ;
+      }
+      else {
+        locsdiv.append("<option value='"+ locations[index] +"'>"+ locations[index] +"</option>\n") ;
+      }
+    }
+}
+
+function submitInit(user, howmany, loc, line) {
+ if(user.match(/^[a-zA-Z0-9]{1,5}$/)) {
+   if (line > 1 && line < 6002) {} else {line = "1" ;}
+  $('#initials').hide();
+  $('#loading').show();
+  $('#username').html(user); // innerhtml on bos page
+  $('#howmany').html(howmany); // innerhtml on bos page
+  //console.log("user: " + user + ", location: " + loc + ", How Many: " + howmany + " Line: " , line) ;
+  google.script.run
+      .withSuccessHandler(showData)
+      .withFailureHandler(getDataFailure)
+      .getData(user,howmany, loc, line);
+ } else {
+   $('#initialsError').show();
+ }
+} // end submitInit
+
+ // catch enter key if used in initials field rather than the continue button
+ // using this because the <form> element didn't seem to work with enter key in app script (??)
+$( "#userInitials" ).on( "keydown", function( event ) {
+  if (event.which === 13) {
+    submitInit($('#userInitials').val(), $('#numberToCheck').val(),$('#location').val() );
+  } // end if enter key
+});
+ 
+
+function getDataFailure(error) {
+        var loadingDiv = $('#loading');
+        loadingDiv.empty(); // remove 'loading...'
+        //var div = document.getElementById('output');
+        loadingDiv.append("ERROR: " + error.message);
+}     
+   
+function showData(nextDataSetWithLoc) { // two items in array - loc and dataset
+  $('#loading').hide(); // remove 'loading...'
+  $('#scrollBox').show() ;
+  $('#myForm').show();
+  $('#catalog_iframe').show() ;
+
+  var div = $('#things');
+  isError = /^ERROR/.test(nextDataSetWithLoc);
+if (isError) {
+      $('#greeting').hide();
+      $('#submitButton').hide();
+      div.append(nextDataSetWithLoc) ;
+      return false ;
+}
+
+ //console.log(nextDataSetWithLoc) ;
+ var loc = nextDataSetWithLoc.shift();
+ var nextDataSet = nextDataSetWithLoc[0] ;
+
+  if (nextDataSet.length == 0) { // no more to check
+      var appendstring = "<h2 class='centerRow'>No more items to check in location <b>" + loc + "</b></h2>"
+      div.append(appendstring);
+      $('#greeting').hide();
+      $('#submitButton').hide();
+      $('#catalog_iframe').hide() ;
+      $('#finished').show();
+
+  } else { // data to check 
+  
+ // div.append("<table>") ;
+  var tooltiptext = "Excellent = Like New\nAcceptable = Usable\nPoor = Dirty, Sticky, Falling Apart" ;
+  for (var i = 0; i < nextDataSet.length; i++) { // 0=call, 1=title, 2=bib #, 3=original row #, 4=barcode, 5=location, 6=enumeration
+     var myElements ="<tr class='bookToCheck'> \
+     <td colspan='1' class='callNumber'><strong>" + nextDataSet[i][0] + " " +  nextDataSet[i][6] + "</strong></td> \
+     <td class='title' colspan='1'>" + nextDataSet[i][1].substring(0, 48) + "</td> \
+     <td class='loc' colspan='1'>" + nextDataSet[i][5] + "</td></tr> \
+     <tr class='formElements'><td ><input class='barcode' type='text' name='barcode-" + nextDataSet[i][3] + "' placeholder=" + nextDataSet[i][4] + "> \
+                                   <input class='barcodevalue' type='hidden' name='barcodedist-" + nextDataSet[i][3] + "' value=" + nextDataSet[i][4] + " </td> \
+      <td class='present'> Present <input class='present' type='radio' name='status-" + nextDataSet[i][3] + "' value='Present'> \
+                           Not On Shelf <input class='missing' type='radio' name='status-" + nextDataSet[i][3] + "' value='NotOnShelf'> \
+                               <!--Checked Out <input type='radio' name='status-" + nextDataSet[i][3] + "' value='out'> -->\
+                                 <input type='radio' name='status-" + nextDataSet[i][3] + "' value='notvalidated' checked='checked' style='display:none'> \
+      </td><td class='bookCondition' id='condition-" + nextDataSet[i][3] + "'> \
+      Condition: <a  type='tip' title='" + tooltiptext +"' target='_blank'>(?)</a> \
+      <select name='condition-" + nextDataSet[i][3] + "'> \
+      <option value=''>Select</option><option value='Excellent'>Excellent</option> \
+      <option value='Acceptable'>Acceptable/Good</option> <option value='Poor'>Poor</option> \
+      </td></tr>"; 
+      
+     div.append(myElements) ;
+     
+     // tooltip for condition
+     $('a[type="tip"]').tooltip();
+     position = { my: 'center bottom', at: 'center top-10' };
+     $('a[type="tip"]').tooltip('option', 'position', position);
+     $('a[type="tip"]').tooltip('option', 'tooltipClass', 'top');
+  
+  } // end for each nextDataSet
+  //div.append("</table>");
+ } // end else there is data to check
+  store() ;
+} // end function showData
+
+function submitData(form) {
+   var online = navigator.onLine;
+   var conditionError = [] ;
+   $('#offlineMessage').hide();
+
+    //console.log( $('#myForm *').filter(':input').serializeArray() );
+    var fields = $('#myForm *').filter(':input').serializeArray() ;
+    //console.log(fields) ;
+    
+    jQuery.each(fields, function(i, field) {
+         var fieldTypeAndRow  = field.name.split("-");
+         if (fieldTypeAndRow[0] === 'status') {
+              var statusValue = field.value ;
+              var conditionValue = fields[i+1].value ; // condition always in field after status
+              var conditionId = 'condition-' + fieldTypeAndRow[1] ;
+              //console.log("Status: " + statusValue + " Conditionid: " + conditionId + " ConditionValue: " + conditionValue) ; 
+              if (statusValue === 'Present' && conditionValue === "")  { // status present but no condition
+                console.log(" Conditionid: " + conditionId ) ;   
+                conditionError.push(conditionId); // array of rows that don't have condition 
+             } // end if status present and no condition 
+         } // end if status
+  });  //end for each form value
+
+   if (conditionError.length != 0) {
+      //console.log(conditionError);
+      var Message = "Please fix " + conditionError.length + " item(s) missing condition and re-submit" ;
+      $('#greeting').html(Message) ;
+      $('#greeting').css({"color":"red"}) ;
+      scroll(0,0) ;
+      jQuery.each(conditionError, function(index,needsCondition) {
+          var cell = '#' + needsCondition ;
+          $(cell).css({"background-color": "red"});
+      });
+   } else { // all things with status have condition
+   
+   if (online) {
+      $('#loading').show();
+      $('#myForm').hide() ;
+      $('#things').hide();
+      $('#submitButton').hide();         
+      $('#submitSuccess').hide();
+      $('#offlineMessage').hide();
+      $('#initials').hide();
+
+      google.script.run
+            .withSuccessHandler(spreadsheetUpdated)
+            .withFailureHandler(submitDataFailure)
+            .processBosForm(form)
+   } else {
+     //alert("offline!") ;
+     $('#offlineMessage').show();
+     $('#greeting').html('');
+
+   } // end else offline
+ } // end else all things with status have condition
+}  // end submitData
+
+function submitDataFailure(error) {
+ $('#things').hide();
+ //console.log("submit failed");
+ $('#things').innerHTML = "ERROR: " + error.message;
+}     
+ 
+function spreadsheetUpdated() {
+    //console.log("got submitted");
+    $('#loading').hide() ;
+    $('#myForm').hide() ;
+    $('#things').hide();
+    $('#submitButton').hide();         
+    $('#submitSuccess').show();
+    clearStore() ; // decided to clear whole thing
+}
+
+function store() { // thanks to https://css-tricks.com/video-screencasts/96-localstorage-for-forms/
+  localStorage.setItem("flag", "true");
+  
+  if (typeof(Storage) !== "undefined") {
+    var thingsHTML = $("#things").html();  // consider using #myForm?
+    //console.log(thingsHTML);
+    localStorage.setItem("thingsHTML", thingsHTML );
+    
+    var data = $("#myForm").serializeArray();
+	$.each(data, function(i, obj) { // iterate over results
+      // console.log(obj.name + ' = ' + obj.value);
+	   localStorage.setItem(obj.name, obj.value);// HTML5 magic!!
+	});				
+    
+ } else {
+    $("#greeting").append("Please consider using an html5 compliant browser to avoid potential form data lose" );
+ }
+} // end store
+
+function loadStore() {
+
+  $('#loading').hide(); // remove 'loading...'    
+  $('#submitSuccess').hide();
+  $('#offlineMessage').hide();
+  $('#initials').hide();
+  $('#scrollBox').show() ;
+  $('#myForm').show();
+
+  var div = $('#things');
+  div.append(localStorage.getItem("thingsHTML"));
+  
+  for (var key in localStorage){
+    //console.log(key + "=" + localStorage.getItem(key)) ;
+    if ( key.match(/^status/)  && (localStorage.getItem(key)=='NotOnShelf') ) {
+       $("input[name='" + key +"'][value='NotOnShelf']").prop("checked",true)  ;
+    }
+    if ( key.match(/^status/)  && (localStorage.getItem(key)=='Present') ) {
+       $("input[name='" + key +"'][value='Present']").prop("checked",true)  ;
+    }
+    if ( key.match(/^condition/)  || key.match(/^barcode/)      ) {
+       //localStorage.getItem(key) 
+       $("[name='" + key +"']").val(localStorage.getItem(key));
+    }
+  } // end for key in localStorage 
+} // end loadStore
+
+function clearStore() {
+  for (var key in localStorage){
+    if ( key.match(/^(?!cat).+/) ) {//remove all execpt catalog keys
+       localStorage.removeItem(key);
+    }
+  } // end for key in localStorage 
+}
+
+
+</script>

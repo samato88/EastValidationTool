@@ -1,0 +1,118 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+//* Run initializations on web app load - this is for the bos.html page
+   
+$(function() {
+    $('#submitSuccess').hide();
+    $('#offlineMessage').hide();
+    $('#myForm').hide();
+    $('#loading').show();
+    $('#finished').hide();
+    
+    google.script.run
+      .withSuccessHandler(showData)
+      .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
+      .getFixData();
+    
+});
+
+  
+ // catch enter key if used in initials field rather than the continue button
+ // using this because the <form> element didn't seem to work with enter key in app script (??)
+$( "#userInitials" ).on( "keydown", function( event ) {
+  if (event.which === 13) {
+    submitInit($('#userInitials').val(), $('#numberToCheck').val(),$('#location').val() );
+  } // end if enter key
+});
+ 
+
+function getDataFailure(error) {
+        var loadingDiv = $('#loading');
+        loadingDiv.empty(); // remove 'loading...'
+        //var div = document.getElementById('output');
+        loadingDiv.append("ERROR: " + error.message);
+}     
+   
+function showData(fullDataSet) { // two items in array - loc and dataset
+  $('#loading').hide(); // remove 'loading...'
+  $('#myForm').show();
+
+  var div = $('#things');
+  isError = /^ERROR/.test(fullDataSet);
+  if (isError) {
+    $('#greeting').hide();
+    $('#submitButton').hide();
+    div.append(fulldataSet) ;
+    return false ;
+  }
+  
+ var myElements = "<table id='fixTable'>" ;
+
+  for (var i = 1; i < fullDataSet.length; i++) {// 0=call, 1=title, 2=bib #, 3=original row #, 4=barcode, 5=location, 6=enumeration
+
+   myElements += "<tr> \
+     <td class='barcode'>" + fullDataSet[i][4] + " </td> \
+     <td class='titlef'>" + fullDataSet[i][1].substring(0, 48) + "</td> \
+     <td> \
+       <select name='status-" + fullDataSet[i][3] + "'> \
+         <option value=''>Select Status</option> \
+         <option value='Present'>Present/Available</option> \
+         <option value='NotOnShelf-Verified'>Not On Shelf</option> \
+         <option value='CheckedOut'>Checked Out</option> \
+         <option value='LMBO'>Lost/Missing/Billed/Other</option> \
+       </select> \
+     </td> \
+     </tr>" ;
+         
+  } // end for each fullDataSet
+  
+  myElements += "</table>" ;
+  div.html(myElements) ;
+  
+} // end showData 
+   
+function submitData(form) {
+   var online = navigator.onLine;
+   var conditionError = [] ;
+   $('#offlineMessage').hide();
+   var fields = $('#myForm *').filter(':input').serializeArray() ;
+   //console.log(fields) ;
+   
+   if (online) {
+      $('#loading').show();
+      $('#myForm').hide() ;
+      $('#things').hide();
+      $('#submitButton').hide();         
+      $('#submitSuccess').hide();
+      $('#offlineMessage').hide();
+
+      google.script.run
+            .withSuccessHandler(spreadsheetUpdated)
+            .withFailureHandler(submitDataFailure)
+            .processFixForm(form)
+   } else {
+     //alert("offline!") ;
+     $('#offlineMessage').show();
+     $('#greeting').html('');
+
+   } // end else offline
+}  // end submitData
+
+function submitDataFailure(error) {
+ $('#things').hide();
+ //console.log("submit failed");
+ $('#things').innerHTML = "ERROR: " + error.message;
+}     
+ 
+function spreadsheetUpdated() {
+    //console.log("got submitted");
+    $('#loading').hide() ;
+    $('#myForm').hide() ;
+    $('#things').hide();
+    $('#submitButton').hide();         
+    $('#submitSuccess').show();
+
+}
+
+</script>

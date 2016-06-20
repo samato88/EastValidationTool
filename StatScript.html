@@ -1,0 +1,131 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<script>
+$(function() {
+  google.script.run
+    .withSuccessHandler(showStats)
+    .withFailureHandler(getDataFailure)
+    .getStatsValue(); 
+    
+  google.script.run
+    .withSuccessHandler(showLocsStats)
+    .withFailureHandler(getDataFailure)
+    .getLocsStatsValue(); 
+    
+  google.script.run
+    .withSuccessHandler(showSheetLink)
+    .withFailureHandler(getDataFailure)
+    .getSheetID(); 
+   
+});
+
+function showSheetLink(id) {
+$('#sheetLink').html("<a href='https://docs.google.com/spreadsheets/d/" + id + "' target='_blank'>See Raw Data</a>" ) ;
+}
+function showLocsStats(locstats) { // Loc	Count	Left to Check	% Left	# in process	# Checked Out	# Present	# LMBO	# Accounted For	% found
+   var statsTable = "<table id='locstatstable'>\n \
+   <tr><td colspan='4' class='left'><b>Items remaining to be checked, by location:</b></td></tr>" ;
+   //var statsTable += "<tr><th>Location</td><th>Remaining</td><th>Total</td></tr>\n" ;   
+   var percentFoundByLoc = "(<i>" ;
+   //console.log(locstats) ;
+   for (i = 0; i < locstats.length; i++) { 
+   
+     var loctemp = parseFloat(locstats[i][12]) ;
+     loctemp = loctemp.toPrecision(3) ;
+     percentFoundByLoc += locstats[i][0] + ': ' + loctemp + '%  ' ;
+     
+     //console.log("loc: " + locstats[i][0]+ "from sheet: " + locstats[i][9] + "to page: " + loctemp) ;
+      var percentRemaining = parseFloat(locstats[i][3]).toPrecision(3);
+      if (percentRemaining == 0) { 
+      statsTable += "<tr><td class='left'>" + locstats[i][0] + "</td> \
+      <td colspan='3'> C O M P L E T E D</td>" ;
+   } else {
+   // <td class='right'>" + locstats[i][2] + " (" + percentRemaining + "%) </td><td>  out of </td> \
+        statsTable += "<tr><td class='left'>" + locstats[i][0] + "</td> \
+        <td class='right'>" + locstats[i][2] + " </td></tr>\n" ;
+        
+        //<td>  out of </td> \
+        //<td class='right'>" + locstats[i][1] + "</td></tr>\n" ;
+    }
+   } // end for each locstats
+   
+  statsTable += "</table>\n" ;
+  percentFoundByLoc += "</i>)" ;
+  //console.log(statsTable) ;
+  $('#locstable').html(statsTable) ;
+  $('#locspercentfound').html(percentFoundByLoc) ;
+} // end showLocsStats
+
+function showStats(stats) {
+ $('#inProcess').html(stats[3]) ; //row 4
+ $('#notOnShelfInProcess').html(stats[4]) ; // row 5
+ $('#totalSheet').html(stats[0]) ; // row 1
+ $('#done').html(stats[6]) ; // row 7
+ $('#notOnShelf').html(stats[14]) ;
+ $('#found').html(stats[10]) ;
+
+ $('#MissingToBeVerfied').html(stats[12]); // row 13
+ 
+ var percentFound = parseFloat(stats[17]) ; // row 18
+ percentFound = percentFound.toPrecision(3) ;
+ $('#percentPresent').html(parseFloat(stats[18]).toPrecision(3)) ; // row 19
+ $('#percent').html("<b>" + percentFound + "</b>") ; 
+
+} // end showStats
+ 
+function getDataFailure(error) {
+ alert("failed to get stats data") ;
+  $('#totalSheet').html("_") ;
+ $('#inProcess').html("_") ;
+ $('#found').html("_") ;
+ $('#missing').html("_") ;
+ $('#done').html("_") ;
+ $('#percent').html("_") ;
+}
+
+function clearInProcess() {
+ if (confirm("Only clear if no one currently working on validation\nChoose OK to proceed or Cancel") == true) {
+   $('#clearMessage').html("(clearing...\nthis may take a few minutes...)") ;
+   google.script.run
+   .withSuccessHandler(cleared)
+   .withFailureHandler(failedClear)
+   .clear();
+ } else {
+ }
+}
+
+function clearMissingInProcess() {
+if (confirm("Only clear if no one currently checking catalog\nChoose OK to proceed or Cancel") == true) {
+
+  $('#clearMessageMissing').html("(clearing...\nthis may take a few minutes...)") ;
+  google.script.run
+    .withSuccessHandler(clearedMissing)
+    .withFailureHandler(failedClear)
+    .clearMissing(); 
+} else {
+  }
+}
+
+function clearedMissing(){
+ $('#clearMessageMissing').html("(Clear)") ;
+ $('#notOnShelfInProcess').html("0") ;
+ google.script.run
+    .withSuccessHandler(showStats)
+    .withFailureHandler(getDataFailure)
+    .getStatsValue(); 
+}
+
+function cleared(){
+ $('#clearMessage').html("(Clear)") ;
+ $('#inProcess').html("0") ;
+}
+
+
+function failedClear() {
+
+}
+
+  
+ 
+</script>

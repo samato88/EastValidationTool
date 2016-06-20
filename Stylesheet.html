@@ -1,0 +1,255 @@
+<!-- This CSS package applies Google styling; it should always be included. -->
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+
+<style>
+
+h1, h2 { font-size: 16px ; font-weight: normal ; }
+
+.result-display {
+  margin-left: 15px;
+  font-size: 125%;
+}
+
+.error {
+  color: #FF0000;
+  margin-top: 5px;
+}
+
+.hidden {
+  display: none;
+}
+
+.callNumber, .title, .loc {
+  /*background-color: #D8BFD8 ;*/
+  background-color: #7DB158	;
+  font-size: 1.3em ;
+  padding: 5px 5px 5px 5px ;
+  overflow: hidden ; 
+}
+.callNumber {width: 230px; }
+.title, .titlef     {width: 400px; }
+.loc        {width: 170px; }
+
+.formElements {
+  /*background-color: #DDA0DD	 ;*/
+  background-color: #D9E6DD ;
+  padding: 5px 5px 5px 5px ;
+  margin: 5px; 
+  width: 800px ;
+  overflow: hidden ; 
+}
+.barcode {
+ margin-left: 5px!important; 
+ width: 140px;
+}
+
+.bookCondition {
+  /*background-color: #DA70D6	 ;*/
+  background-color: #C1DCBE  ; 
+  padding: 5px 5px 5px 5px ;
+}
+
+p.bookToCheck {
+   margin: 1px ;
+}
+
+.matched {
+   background-color: #8AF58A !important;
+}
+
+.misMatched {
+   background-color: #FF4A4A !important;
+}
+
+#submitButton {
+   margin-top: 10px ;
+}
+
+.block {
+  background-color:#f5f5f5;
+  padding:10px;
+  border:1px solid #cbcbcb;
+  border-top:0px;
+  /*min-height:200px ;*/
+  height: 200px;
+  margin: 5px 0px 20px 5px ;
+  width: 200px ;
+  text-align: center;
+  vertical-align: text-bottom;
+ }
+ 
+.centerRow {
+   margin:auto;
+   text-align: center;
+   margin-bottom: 10px;
+   position: relative ;
+}
+ 
+#banner {
+  background-color:  #B3417F ;
+}
+
+#banner h1 {
+   color: white ;
+   text-align: center; 
+   font-size: 16px ;
+}
+
+.buttonBox {
+   box-shadow:0px 2px 3px 2px #e3e3e3;
+   color:white!important;
+   border-radius:2px;
+   display:inline-block;
+   margin-top: 5px;
+   font-size:14px;
+   font-weight:bold;
+   padding:8px;
+   text-align:center;
+   text-transform:uppercase;
+   text-decoration:none;
+}
+
+.colorBar {
+  padding:3px;
+  margin-bottom:10px;
+}
+
+.verify {
+   background-color: #f4b400 ;
+}
+
+.checkShelves {
+   background-color:#3d9400;
+}
+
+.stats {
+   background-color:#673AB7
+}
+#locstatstable tr:nth-child(odd)  {background-color: #f2f2f2}
+td { padding: 7px; }
+#locstatstable tbody tr td.left  { text-align: left ; }
+#locstatstable tbody tr td.right { text-align: right ;}
+
+#notOnShelfTable tr:nth-child(odd) {background-color: #f2f2f2}
+#fixTable tr:nth-child(odd) td {background-color: #f2f2f2} 
+#fixTable { width: 800px ; margin:auto ;}
+/* 
+#scrollBox {
+    background-color: #f2f2f2;
+    width: 700px;
+    height: 300px;
+    overflow: scroll;
+    border: solid black 1px;
+}
+*/
+
+#sheetLink {
+text-align:right;
+font-size: .8em ;
+}
+
+#fixData { /* link on home page */
+position: absolute; 
+bottom: 15px;
+font-size: .8em ;
+margin-left: 100px; 
+text-align: right ;
+}
+
+.fixedSubmit {/* submit button on fixed page */
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+   border: 1px solid #B3417F !important;
+    
+}
+
+/*
+th {
+   font-weight: bold ;
+   text-align: center ;
+   vertical-align: bottom;
+}
+*/
+/*https://jsfiddle.net/dPixie/byB9d/3/light/*/
+ 
+section {
+  position: relative;
+  border: 1px solid #000;
+  padding-top: 37px;
+  background: #B3417F; /* grey: #F5F5F5; */
+}
+section.positioned {
+  position: absolute;
+  top:100px;
+  left:100px;
+  /*width:800px;*/
+  box-shadow: 0 0 15px #333;
+}
+.container {
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+table {
+  border-spacing: 0;
+  width:100%;
+}
+
+td, th {
+  /*border-bottom:1px solid black;*/
+  background: #F5F5F5;
+  color: #000;
+  font-weight: bold ;
+  padding: 10px 25px;
+}
+th {
+  height: 0;
+  line-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: transparent;
+  border: none;
+  white-space: nowrap;
+}
+th div{
+  position: absolute;
+  background: transparent;
+  color: #fff;
+  padding: 9px 25px;
+  top: 0;
+  margin-left: -25px;
+  line-height: normal;
+  /*border-left: 1px solid black;*/
+}
+
+.ui-tooltip {
+    background: #666;
+    color: white;
+    border: none;
+    padding: 0;
+    opacity: 1;
+}
+.ui-tooltip-content {
+    position: relative;
+    padding: 1em;
+}
+.ui-tooltip-content::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+}
+
+.top .ui-tooltip-content::after {
+    bottom: -10px;
+    left: 72px;
+    border-color: #666 transparent;
+    border-width: 10px 10px 0;    
+}
+.ui-tooltip {
+    white-space: pre-line;
+}
+
+</style>

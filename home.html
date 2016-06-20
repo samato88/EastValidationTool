@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link rel="icon" type="image/png" href="https://googledrive.com/host/0B8sJaH4hMTrGTHRLZ1ladk9zVkE/book.png">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?> 
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+   <?var url = getScriptUrl();?>
+   <?var libraryName = scriptProperties.getProperty('libraryName');  ?>
+
+</head>
+<body>
+  <div id="banner">
+    <h1>EAST Validation Study <?= libraryName ?></h1>
+  </div>   
+
+<div class="centerRow">
+ <div class="block inline">  
+  <div class="colorBar checkShelves"></div>   
+  <a class="buttonBox checkShelves" href='<?=url?>?page=bos'>Check Shelves</a>
+  <p>Check the shelves to verify the presence of an item.   </p>  
+  <p><span id="inProcess"></span> Items In Process <a class="confirmlink" id="clearMessage" onclick="clearInProcess();">(Clear)</a></p> 
+  <p id="fixData"><a href='<?=url?>?page=fix'>Fix Status Entry Error</a></p>  
+ </div>
+
+ <div class="block inline">  
+   <div class="colorBar verify"></div>
+   <a class="buttonBox verify" href='<?=url?>?page=missing'>Catalog Check</a>
+   <p>Confirm Status of <span id="MissingToBeVerfied"></span><br /> items not found on shelf</p>  
+   <p><span id="notOnShelfInProcess"></span>   In Process <a class="confirmlink" id="clearMessageMissing" onclick="clearMissingInProcess();">(Clear)</a></p> 
+ </div>
+</div>
+
+<div class="block centerRow" style="width: 430px; height: auto;">  
+  <div class="colorBar stats"></div>
+  <p class="buttonBox stats">Current Stats </p>
+  <p><span id="totalSheet"></span> volumes are on your list, <span id="done"></span> of which have been checked.</p>
+  <p>Accounted for:  <span id="found"></span> <br />
+  At the current rate you will find <span id="percent"></span>% on shelf. <br />
+  <span id="locspercentfound"></span>
+  <hr />
+   <!-- <span id="notOnShelf"></span> have been recorded as not on shelf <br />-->
+   <p> <span id="percentPresent"></span>% of the accounted for items are physically present on the shelf. 
+    
+    
+  </p>
+   <hr />
+ <div id="locstable"></div>
+ <p id="sheetLink">See Raw Data</p>
+</div> 
+
+ 
+
+  <!-- Use a templated HTML printing scriptlet to import JavaScript. -->
+  <?!= HtmlService.createHtmlOutputFromFile('StatScript').getContent(); ?>
+ 
+</body>
+</html>
+
+

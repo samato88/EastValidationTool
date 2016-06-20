@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>   
+    <?var url = getScriptUrl();?>
+    <?var libraryName = scriptProperties.getProperty('libraryName');  ?>
+  </head>
+  
+  <body>
+  <div id="banner">
+    <h1>EAST Validation Study: Fix Entry Error : <?= libraryName ?></h1>
+  </div>  
+    
+   <div id="loading" class="centerRow">
+             <h2>Processing...</h2>
+             <img src="https://blc.org/sites/default/files/BLC_Uploads/images/loopingCircle.gif" alt="loading" />
+             <h2>Note this make take a minute or two to process your entire list</h2>
+   </div>
+   
+   <form id="myForm">  
+        <h2 id="greeting" style="text-align:center">Complete Spreadsheet Sorted by Title<br/>
+        
+        </h2>
+        <div id="things">   
+        </div>
+        
+        <input id='submitButton' class="fixedSubmit" type="button" value="Submit Update" onclick="submitData(this.parentNode)" />  
+         
+   </form>
+   
+<div id="submitSuccess">
+  <div class="centerRow">
+    <h1>Data Successfully Submitted</h1>
+    <h2>
+     <a href='<?=url?>'>Return to the Start Page</a> 
+    </h2>
+  </div>
+</div>
+ 
+
+<div id="offlineMessage" title="Offline!">
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+    <span class="error">You are currently <b>OFFLINE</b> and cannot upload.</span>
+  
+   Please return to a wifi / network connection and try again
+  </p>
+</div>
+
+<div class="centerRow">
+  <div id="finished" title="Finished Validation">
+     <a class="buttonBox checkShelves" href='<?=url?>'>Return to Home Page</a>
+  </div>
+</div>
+ 
+    <!-- Use a templated HTML printing scriptlet to import JavaScript. -->
+    <?!= HtmlService.createHtmlOutputFromFile('FixScript').getContent(); ?>
+  </body>
+</html>

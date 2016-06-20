@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    
+    <?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>   
+    <?var url = getScriptUrl();?>
+    <?var libraryName = scriptProperties.getProperty('libraryName');  ?>
+  </head>
+  
+  <body>
+  <div id="banner">
+    <h1>EAST Validation Study: Book on Shelf : <?= libraryName ?></h1>
+  </div>  
+    
+   <div id="initials">
+     <div class="block centerRow" style="height:250px;"> 
+      <div class="colorBar checkShelves"></div> 
+      <p>Enter Your Initials:</p>
+    <!-- <form   onsubmit="submitInit($('#userInitials').val())">  problem with using from tag and enter button to submit-->
+       <p><input type="text" id="userInitials" name="user" /></p>
+       <p>Location: <select id="location"></select>
+       </p>
+       <p>Start at Line Number: <input type="text" id="lineNumber" name="lineNumber" maxlength="4" size="4"/></p>
+       <p>How many?
+       <select id="numberToCheck">
+       <option value="10" selected="selected">10</option>
+       <option value="25">25</option>
+       <option value="50">50</option>
+       <option value="75">75</option>
+       <option value="100">100</option>
+       </select>
+       </p>
+       <input id='continueButton' type="button" value="Continue" 
+       onclick="submitInit($('#userInitials').val(), $('#numberToCheck').val(), $('#location').val(), $('#lineNumber').val())" />
+
+    <!--  </form>-->
+      <div id="initialsError" class="centerRow"><p class="error">Invalid Entry.</p><p>  Initals may be up to 5 characters long 
+      and contain only <br />letters and numbers.</p> <p> Line numbers must be between<br /> 2 - 6001.</p>
+      </div>
+     </div>
+   </div>
+    
+   <div id="loading" class="centerRow">
+             <h2>Processing...</h2>
+             <img src="https://blc.org/sites/default/files/BLC_Uploads/images/loopingCircle.gif" alt="loading" />
+          
+   </div>
+   
+   <form id="myForm">  
+        <h2 id="greeting">Hello <span id='username'></span>, Here's Your List of <span id='howmany'></span> items:</h2>
+        <div id="things">   
+        </div>
+        <input id='submitButton' type="button" value="Submit Data" onclick="submitData(this.parentNode)" />        
+   </form>
+   
+<div id="submitSuccess">
+  <div class="centerRow">
+    <h1>Data Successfully Submitted</h1>
+    <h2>
+     <a href='<?=url?>'>Return to the Start Page</a> 
+    </h2>
+  </div>
+</div>
+ 
+
+<div id="offlineMessage" title="Offline!">
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+    <span class="error">You are currently <b>OFFLINE</b> and cannot upload.</span>
+  
+   Please return to a wifi / network connection and try again
+  </p>
+</div>
+
+<div class="centerRow">
+  <div id="finished" title="Finished Validation">
+     <a class="buttonBox checkShelves" href='<?=url?>'>Return to Home Page</a>
+  </div>
+</div>
+ 
+    <!-- Use a templated HTML printing scriptlet to import JavaScript. -->
+    <?!= HtmlService.createHtmlOutputFromFile('JavaScript').getContent(); ?>
+  </body>
+</html>
