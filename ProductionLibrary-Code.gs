@@ -186,10 +186,11 @@ function updateSheetColumn(rows, newValues, column, sheet) { //update entire she
     var maxRows = String(sheet.getMaxRows()); // get number of rows in sheet, grab entire column
     var sheetRange = column + "2:" + column + maxRows ;
     var allRange = sheet.getRange(sheetRange);// e.g. sheet.getRange("A2:A6001") 
-    var distValues = allRange.getValues();    // values currently in the column
+    var distValues = allRange.getValues();    // values currently in the column A2 - A6001, indexed 0 - 5999
 
     for (index = 0; index < rows.length; ++index) {  
-      distValues[rows[index]] = newValues[index] ; // update values in rows that have new values
+      Logger.log("COLUMN: " + column + " ROW:  " + rows[index] +  " distValues: " +  distValues[rows[index]] +  " NewValues: " + newValues[rows[index]]) ;
+      distValues[rows[index]-2] = newValues[index] ; // update values in rows that have new values, not index off by 2 compared to row #
     }// end for index of rows
   
     var updateValues = [] ; // create new array for update [][]
