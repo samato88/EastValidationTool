@@ -2,13 +2,10 @@
 
 function getFixData(sheet) { // get next numberToCheck  items to check
   var lock = LockService.getScriptLock();
-  //var numberToCheck = 10 ; // how large do we want the check sets to be?
   if (lock.tryLock(30000))  {
- 
-    //Logger.log(sheet.getName()); // just a test to see if we get the sheet we wanted    
-    
+     
     var data = sheet.getDataRange().getValues(); // gets the whole sheet, returns object[][]
-    var dataLength = sheet.getDataRange().getLastRow(); // not sure why data.length object is undefined
+    var dataLength = sheet.getDataRange().getLastRow();  
     var count = 1 ;
     var fullDataSet = [] ;
     var updateRows = [] ;  
@@ -21,52 +18,34 @@ function getFixData(sheet) { // get next numberToCheck  items to check
         var enum = row[5] ;
 
         if (patt.exec(enum)) { //if (row[5] has * don't bother with it 
-          //Logger.log("got row: " + i + " enum: " + enum) ;
           enum = "" ;
         }
         
       var barcode = row[1] ;
       var barcode = String(barcode).replace(/\s?/g, ''); //strip spaces from barcode
       fullDataSet.push([row[3],row[6],row[11], i, barcode, row[2], enum]) ; // pass back call #, title, bib link, original row number, barcode, location, enum
-      // try pusing with title as key and sorting
       var rowNumber = i + 1 ; // note i indexed at 0 while rows indexed at 1         
     } // end for data.length
   } // end if got the lock
   else {
-    //alert("Failed to lock data file.  Try again soon.") ;"The time is: " + now.toString());
-    GmailApp.sendEmail("samato@blc.org", "epic fail", "lock acquisition fail on getData script for: " + libraryName);
+    GmailApp.sendEmail("PutYour@emailaddress.here", "Lock Fail!", "lock acquisition fail on getData script for: " + libraryName);
     FullDataSet = "ERROR: failed to lock file for updating.  Try again." ;
   }
   
   lock.releaseLock();
   
-  // Logger.log(fullDataSet);
-  
- // var sorted = [];
- // Object.keys(fullDataSet).sort().forEach(function(key) {
-  //  sorted[key] = fullDataSet[key];
-  //});
-  
   fullDataSet.sort(compareTitleColumn);
-
-  
   return fullDataSet ;
-  //return sorted ;
 } // end getData
 
 //===================================================================================================
 
-function getData(user,numberToCheck, location, sheet, libraryName, line) { 
-  
-  // get next numberToCheck  items , starting at line, in location
+function getData(user,numberToCheck, location, sheet, libraryName, line) { // get next numberToCheck  items , starting at line, in location
   var lock = LockService.getScriptLock();
-  //var numberToCheck = 10 ; // how large do we want the check sets to be?
   if (lock.tryLock(30000))  {
- 
-    //Logger.log(sheet.getName()); // just a test to see if we get the sheet we wanted    
-    
+     
     var data = sheet.getDataRange().getValues(); // gets the whole sheet, returns object[][]
-    var dataLength = sheet.getDataRange().getLastRow(); // not sure why data.length object is undefined
+    var dataLength = sheet.getDataRange().getLastRow(); 
 
     var count = 1 ;
     var nextDataSet = [] ;
@@ -87,7 +66,6 @@ function getData(user,numberToCheck, location, sheet, libraryName, line) {
         var enum = row[5] ;
 
         if (patt.exec(enum)) { //if (row[5] has * don't bother with it 
-          //Logger.log("got row: " + i + " enum: " + enum) ;
           enum = "" ;
         }
         
@@ -107,28 +85,24 @@ function getData(user,numberToCheck, location, sheet, libraryName, line) {
     updateSheetColumn(updateRows, updateInProcess, "A", sheet);  // Status goes in A
   } // end if got the lock
   else {
-    //alert("Failed to lock data file.  Try again soon.") ;"The time is: " + now.toString());
-    GmailApp.sendEmail("samato@blc.org", "epic fail", "lock acquisition fail on getData script for: " + libraryName);
+    GmailApp.sendEmail("PutYour@emailaddress.here", "Lock Fail!", "lock acquisition fail on getData script for: " + libraryName);
     nextDataSet = "ERROR: failed to lock file for updating.  Try again." ;
   }
   
   lock.releaseLock();
-  //  Logger.log("returning:  " + nextDataSet) ;
   
   var returnData = [location, nextDataSet];
-  // Logger.log(returnData);
   return returnData ;
 } // end getData
 
 //===================================================================================================
-function getMissing(sheet, libraryName) { // get next numberToCheck  items to check
+function getMissing(sheet, libraryName) { 
   var lock = LockService.getScriptLock();
-  //var numberToCheck = 10 ; // how large do we want the check sets to be?
   
   if (lock.tryLock(30000))  {
  
     var data = sheet.getDataRange().getValues(); // gets the whole sheet, returns object[][]
-    var dataLength = sheet.getDataRange().getLastRow(); // not sure why data.length object is undefined
+    var dataLength = sheet.getDataRange().getLastRow(); 
     var count = 1 ;
     var nextDataSet = [] ;
     var updateRows = [] ;  
@@ -146,11 +120,9 @@ function getMissing(sheet, libraryName) { // get next numberToCheck  items to ch
         var enum = row[5] ;
 
         if (patt.exec(enum)) { //if (row[5] has * don't bother with it 
-          //Logger.log("got row: " + i + " enum: " + enum) ;
           enum = "" ;
         }
         
-        //var catalogLink = getCatalogLink(ils, ilsurl, row[10]) ;
         nextDataSet.push([row[3],row[6],row[11], i, row[1], row[2], enum]) ; // pass back call #, title, bib link, original row number, barcode, location, enum
         
         var rowNumber = i + 1 ; // note i indexed at 0 while rows indexed at 1 
@@ -164,13 +136,11 @@ function getMissing(sheet, libraryName) { // get next numberToCheck  items to ch
  
  } // end if got the lock
   else {
-    //alert("Failed to lock data file.  Try again soon.") ;
-    GmailApp.sendEmail("samato@blc.org", "epic fail", "lock acquisition fail on a missing script: " + libraryName);
+    GmailApp.sendEmail("PutYour@emailaddress.here", "Lock Fail!", "lock acquisition fail on getData script for: " + libraryName);
     nextDataSet = "ERROR: failed to lock file for updating.  Try again." ;
     Logger.log("Lock Error") ;
   }
   lock.releaseLock();
-  //Logger.log("returning:  " + nextDataSet) ;
 
   return nextDataSet ;
   
@@ -247,7 +217,7 @@ function processBosForm(formObject, sheet) { //https://developers.google.com/app
   
   for (k in myData) {
     if (myData.hasOwnProperty(k)) {
-      keys.push(parseInt(k));  // make sure it is an int, actually default sort was problem.
+      keys.push(parseInt(k)); 
     }
   }
 
@@ -269,7 +239,6 @@ d.getSeconds().toString();
               
   for (i = 0; i < len; i++) {
     updateRow = keys[i];
-    //Logger.log('UpdateRow:  ' + updateRow + " i: " + i + ' len: ' + len);
     
     if (myData[updateRow]['barcode'] == myData[updateRow]['barcodedist']) {
       barcodeChecked = 'yes' ;
@@ -307,7 +276,6 @@ d.getSeconds().toString();
 function processMissingForm(formObject, sheet) { //https://developers.google.com/apps-script/guides/html/communication#forms
   var formResults = formObject ;
   var myData = [];
-  //Logger.log(formResults);// 
   
   for (var field in formResults) {
     if (formResults.hasOwnProperty(field)) {
@@ -324,7 +292,7 @@ function processMissingForm(formObject, sheet) { //https://developers.google.com
   keys = [];  
   for (k in myData) {
     if (myData.hasOwnProperty(k)) {
-      keys.push(parseInt(k));  // make sure it is an int, actually default sort was problem.
+      keys.push(parseInt(k));  
     }
   }
 
@@ -365,14 +333,12 @@ d.getSeconds().toString();
 function processFixForm(formObject, sheet) { //https://developers.google.com/apps-script/guides/html/communication#forms
   var formResults = formObject ;
   var myData = [];
-  //Logger.log(formResults);// 
   
   for (var field in formResults) {
     if (formResults.hasOwnProperty(field)) {
       var fieldTypeAndRow  = field.split("-"); //status-20
       
       if (formResults[field] !== "") {
-        //Logger.log('Field: ' + fieldTypeAndRow[0] + " " + fieldTypeAndRow[1] + " Result: " + formResults[field]) ;
         var row = parseInt(fieldTypeAndRow[1]) +1 ;
         myData[row] = formResults[field];
       } // if has value
@@ -382,7 +348,7 @@ function processFixForm(formObject, sheet) { //https://developers.google.com/app
   keys = [];  
   for (k in myData) {
     if (myData.hasOwnProperty(k)) {
-      keys.push(parseInt(k));  // make sure it is an int, actually default sort was problem.
+      keys.push(parseInt(k));  
     }
   }
 
@@ -449,7 +415,6 @@ function clear(sheet, clearvalue) { // reset any columns that are inProcess
      } // if InProcess
   } // end for each row, 
   //clear inprocess, initials, condition, barcodeval, timestamp
-  //Logger.log(clearvalue) ;
   switch (clearvalue) {
     case ('InProcess'):
       updateSheetColumn(clearRows, clearRowsValues, "A", sheet) ; 
