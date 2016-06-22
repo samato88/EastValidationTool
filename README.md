@@ -1,6 +1,6 @@
 # EAST Validation Tool 
 
-The following files were used to create the Validation Tool that was used by the   [EAST libraries](http://eastlibraries.org/ ) validation project. 
+The following files were used to create the Validation Tool that was used by the   [EAST libraries](https://blc.org/east-project ) validation project. 
 
 ### Google App Script used for each library 
 Each library used a distinct  Google App Script that contained these files:
