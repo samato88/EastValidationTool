@@ -224,7 +224,8 @@ function processBosForm(formObject, sheet) { //https://developers.google.com/app
   keys.sort(sortByNumber);
   var len = keys.length;
   var d = new Date();
-  var dateStamp = d.getFullYear().toString() +  "-" + d.getMonth().toString() +   "-" + d.getDate().toString() + " " + d.getHours().toString() + ":" + d.getMinutes().toString() + ":" +
+  var month = d.getMonth() + 1 ;
+  var dateStamp = d.getFullYear().toString() +  "-" + month +   "-" + d.getDate().toString() + " " + d.getHours().toString() + ":" + d.getMinutes().toString() + ":" +
 d.getSeconds().toString();
   var barcodeChecked ;
   var updateRows = [] ;
