@@ -173,7 +173,7 @@ function updateSheetColumn(rows, newValues, column, sheet) { //update entire she
   } // end got lock
   else {
     Logger.log("Failed to get lock") ;
-    GmailApp.sendEmail("samato@blc.org", "script lock error", "lock acquisition fail on a script!");
+    GmailApp.sendEmail("youremail@xyz.edu", "script lock error", "lock acquisition fail on a script!");
   }
   lock.releaseLock();
 } // end updateSheetColumn
@@ -399,7 +399,7 @@ function clear(sheet, clearvalue) { // reset any columns that are inProcess
     var aData = sheet.getRange(checkRange).getValues(); // gets column A, returns object[][]   
   } // end lock
   else {
-    GmailApp.sendEmail("samato@blc.org", "script lock error", "lock acquisition fail on a script clear!");
+    GmailApp.sendEmail("youremail@xyz.edu", "script lock error", "lock acquisition fail on a script clear!");
     return("ERROR getting lock on clear sheet") ;
   }
   lock.releaseLock();
