@@ -19,17 +19,19 @@ $(function() {
     
     google.script.run
       .withSuccessHandler(showHttpsIframe)
-      .withFailureHandler(getDataFailure)  
+      .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
       .getCatalogHttps();
     //var catalogHttps = google.script.run.getCatalogHttps(); //sadly this syntax can't return value
          
-   if (localStorage.getItem("catalogFlag") == "true"  && localStorage.getItem("thingsNotOnShelfHTML") !== "") {
+   if (localStorage.getItem("catFlag") == "true" && (localStorage.getItem("catalogthingsNotOnShelfHTML") !== null &&
+   localStorage.getItem("catalogthingsNotOnShelfHTML").length > 15  
+   )) {
        $( "#greeting" ).append( " - <b>Using Saved Data First!</b>" );
-	   loadStore(); 
+   loadStore(); 
     } else { 
       google.script.run
         .withSuccessHandler(showMissing)
-        .withFailureHandler(getDataFailure)  
+        .withFailureHandler(getDataFailure) // NEED TO PUT APPROPRIATE FAILURE
         .getMissing();
     }
 });
@@ -44,6 +46,7 @@ function showHttpsIframe(truefalse) {
 function getDataFailure(error) {
         var loadingDiv = $('#loading');
         loadingDiv.empty(); // remove 'loading...'
+        //var div = document.getElementById('output');
         loadingDiv.append("ERROR: " + error.message);
 }     
    
@@ -57,10 +60,11 @@ function showMissing(notOnShelfData) { //
   var div = $('#thingsNotOnShelf');
   
  if (isMatch = /^ERROR.*/.test(notOnShelfData)) {
- div.html("ERROR Getting Data - try again later.  If problem persists report this error to <a href='mailto:PutYour@EmailAddress.Here'>EAST</a>.") ;
+ div.html("ERROR Getting Data - try again later.  If problem persists report this error to <a href='mailto:samato@blc.org'>EAST</a>.") ;
  }// or test if string and not array 
 
  if (notOnShelfData.length == 0) { // no more to check
+      clearStore();
       $('#greeting').hide();
       $('#catalog_iframe').hide() ;
       $('#scrollBox').hide() ;
@@ -156,15 +160,15 @@ function store() { // thanks to https://css-tricks.com/video-screencasts/96-loca
   localStorage.setItem("catFlag", "true");
   
   if (typeof(Storage) !== "undefined") {
-    var catalogthingsNotOnShelfHTML = $("#thingsNotOnShelf").html();   
+    var catalogthingsNotOnShelfHTML = $("#thingsNotOnShelf").html();  // consider using #myForm?
     //console.log(thingsNotOnShelfHTML);
     localStorage.setItem("catalogthingsNotOnShelfHTML", catalogthingsNotOnShelfHTML );
     
     var data = $("#myForm").serializeArray();
-	$.each(data, function(i, obj) { // iterate over results
+$.each(data, function(i, obj) { // iterate over results
       // console.log(obj.name + ' = ' + obj.value);
-	   localStorage.setItem('catalog' + obj.name, obj.value);// HTML5 magic!!
-	});				
+   localStorage.setItem('catalog' + obj.name, obj.value);// HTML5 magic!!
+});
     
  } else {
     $("#greeting").append("Please consider using an html5 compliant browser to avoid potential form data lose" );
